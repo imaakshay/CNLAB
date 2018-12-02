@@ -317,6 +317,11 @@ Simulator::Destroy();
 return 0;
 }
 
+//./waf --run scratch/Program3 > cwnd.dat 2>&1
+//Now run gnuplot
+//gnuplot> set terminal png size 640,480
+//gnuplot> set output "cwnd.png"
+//gnuplot> plot"cwnd.dat" using 1:2 title 'Congestion Window' with linespoints gnuplot> exit
 
 //4 program
 #include "ns3/core-module.h"
