@@ -206,3 +206,147 @@ public class udpclient {
 		ds.send(dp);
 	}
 }
+
+//Leaky
+package labpractice;
+import java.util.*;
+import java.io.*;
+class queue
+{
+	int q[],f=0,r=0;
+	void insert(int n)
+	{
+		Scanner sc=new Scanner(System.in);
+		q=new int[10];
+		for(int i=0;i<n;i++)
+		{
+			System.out.println("Enter the "+i+"packet");
+			int ele=sc.nextInt();
+			if(r+1>10)
+			{
+				System.out.println("Queue is full. Lost packet:"+ele);
+				break;
+			}
+			else
+			{
+				
+				
+				r++;
+				q[i]=ele;
+			}
+		}
+	}
+		void delete()
+		{
+			Thread t=new Thread();
+			if(r==0)
+				System.out.println("Queue is Empty");
+			else
+			{
+				for(int i=f;i<r;i++)
+				{
+				try
+				{
+					t.sleep(1000);
+				}
+				catch(Exception e)
+				{}
+					
+						System.out.println("Leaked Packet"+q[i]);
+					f++;
+				}
+			}
+		}
+}
+class licky extends Thread
+{
+	public static void main(String args[])
+	{
+		queue q=new queue();
+		Scanner src=new Scanner(System.in);
+		System.out.println("\nEnterthepacketstobesent:");
+		int size=src.nextInt();
+		
+		q.insert(size);
+		q.delete();
+	}
+}
+
+//BellmanFord
+package labpractice;
+import java.util.*;
+public class BellmanFord
+{
+	private int n,d[];
+	private static final int MAX_VALUE=999;
+	public BellmanFord(int n)
+	{
+		this.n=n;
+		d=new int[n+1];
+	}
+	public void shortestpath(int a[][],int s)
+	{
+		for(int i=1;i<=n;i++)
+		{
+			d[i]=MAX_VALUE;
+		}
+		d[s]=0;
+		for(int k=1;k<=n-1;k++)
+		{
+			for(int i=1;i<=n;i++)
+			{
+				for(int j=1;j<=n;j++)
+				{
+					if(a[i][j]!=MAX_VALUE)
+					{
+						if(d[j]>d[i]+a[i][j])
+							d[j]=d[i]+a[i][j];
+					}
+				}
+			}
+		}
+		for(int k=1;k<=n-1;k++)
+		{
+			for(int i=1;i<=n;i++)
+			{
+				for(int j=1;j<=n;j++)
+				{
+					if(a[i][j]!=MAX_VALUE)
+					{
+						if(d[j]>d[i]+a[i][j])
+							System.out.println("negative cycle");
+					}
+				}
+			}
+		}
+		for(int i=1;i<=n;i++)
+			System.out.println("Distance of Source "+s+" to vertex"+i+" is:"+d[i]);
+	}
+	public static void main(String args[])
+	{
+		int n,s;
+		Scanner sc=new Scanner(System.in);
+		System.out.println("Enter the Number of vertex:");
+		n=sc.nextInt();
+		int a[][]=new int[n+1][n+1];
+		System.out.println("Enter adjancy matrix");
+		for(int i=1;i<=n;i++)
+		{
+			for(int j=1;j<=n;j++)
+			{
+				a[i][j]=sc.nextInt();
+				if(i==j)
+					a[i][j]=0;
+				if(a[i][j]==0)
+				{
+					a[i][j]=MAX_VALUE;
+					continue;
+				}
+			}
+		}
+		System.out.println("Enter the source vertex");
+		s=sc.nextInt();
+		BellmanFord b=new BellmanFord(n);
+		b.shortestpath(a,s);
+	}
+}
