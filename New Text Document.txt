@@ -1,0 +1,208 @@
+//RSA
+import java.math.BigInteger;
+import java.util.Random;
+import java.io.*;
+import java.util.*;
+public class RSA
+{
+	private BigInteger p;
+	private BigInteger q;
+	private BigInteger N;
+	private BigInteger phi;
+	private BigInteger e;
+	private BigInteger d;
+	private int bitlength = 1024;
+	private int blocksize = 256;
+	private Random r;
+	public RSA()
+	{
+		r = new Random();
+		p = BigInteger.probablePrime(bitlength,r);
+		q = BigInteger.probablePrime(bitlength,r);
+		N = p.multiply(q);
+		phi = p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE));
+		e = BigInteger.probablePrime(bitlength / 2, r);
+		while(phi.gcd(e).compareTo(BigInteger.ONE) > 0 && e.compareTo(phi) < 0)
+		{
+			e.add(BigInteger.ONE);
+		}
+		d = e.modInverse(phi);
+	}
+	public static void main(String[] args) throws IOException{
+		RSA rsa = new RSA();
+		DataInputStream sc = new DataInputStream(System.in);
+		System.out.println("Enter the string ");
+		String str = sc.readLine();
+		System.out.println("String : " + str);
+		System.out.println("String in Bytes " + byteToString(str.getBytes()));
+		byte[] encrypted = rsa.encrypt(str.getBytes());
+		System.out.println("Encrypt String in Bytes " + byteToString(encrypted));
+		byte[] decrypted = rsa.decrypt(encrypted);
+		System.out.println("Decrypted String in bytes : " + byteToString(decrypted));
+		System.out.println("Decrypted String " + new String(decrypted));
+	}
+	public static String byteToString(byte[] encrypt)
+	{
+		String test = "";
+		for(byte b : encrypt)
+		{
+			test += Byte.toString(b);
+		}
+		return test;
+	}
+	public byte[] encrypt(byte[] message)
+	{
+		return(new BigInteger(message)).modPow(e,N).toByteArray();
+	}
+	public byte[] decrypt(byte[] message)
+	{
+		return(new BigInteger(message)).modPow(d,N).toByteArray();
+	}
+}
+
+
+//TCP
+//server
+
+import java.io.*;
+import java.net.*;
+
+
+public class Server {
+	public final static int SOCKET_PORT=13267;
+	public final static String FILE_TO_SEND="e:/source.txt";
+	public static void main(String args[]) throws Exception
+	{
+		FileInputStream fis=null;
+		BufferedInputStream bis=null;
+		OutputStream os=null;
+		ServerSocket servsock=null;
+		Socket sock=null;
+		try
+		{
+			servsock=new ServerSocket(SOCKET_PORT);
+			while(true)
+			{
+				System.out.println("waiting");
+				try
+				{
+					sock=servsock.accept();
+					System.out.println("Accepted Connection"+sock);
+					File myfile=new File(FILE_TO_SEND);
+					byte[] mybytearray=new byte[(int)myfile.length()];
+					fis=new FileInputStream(myfile);
+					bis=new BufferedInputStream(fis);
+					bis.read(mybytearray,0,mybytearray.length);
+					os=sock.getOutputStream();
+					System.out.println("sending"+FILE_TO_SEND+"("+mybytearray.length+"bytes)");
+					os.write(mybytearray,0,mybytearray.length);
+					os.flush();
+					System.out.println("done");
+				}
+					finally{
+						if(bis!=null)bis.close();
+						if(fis!=null)fis.close();
+						if(sock!=null)sock.close();
+						
+					
+					
+					
+				}
+
+			}
+		}
+		finally
+		{
+			if(servsock!=null)servsock.close();
+		}
+		
+	}
+
+}
+//client
+
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.Socket;
+
+public class Client {
+	public final static int SOCKET_PORT = 13267; // you may change this
+	public final static String SERVER = "127.0.0.1"; // localhost
+	public final static String
+	FILE_TO_RECEIVED = "e:/source-downloaded.txt"; // you may change this, I give a
+	// different name because i don't want to
+	// overwrite the one used by server...
+	public final static int FILE_SIZE = 200; // file size temporary hard coded
+	// should bigger than the file to be downloaded
+	public static void main (String [] args ) throws IOException {
+		int bytesRead;
+		int current = 0;
+		FileOutputStream fos = null;
+		BufferedOutputStream bos = null;
+		Socket sock = null;
+		try {
+		sock = new Socket(SERVER, SOCKET_PORT);
+		System.out.println("Connecting...");
+		// receive file
+		byte [] mybytearray = new byte [FILE_SIZE];
+		InputStream is = sock.getInputStream();
+		fos = new FileOutputStream(FILE_TO_RECEIVED);
+		bos = new BufferedOutputStream(fos);
+		bytesRead = is.read(mybytearray,0,mybytearray.length);
+		current = bytesRead;
+		do {
+		bytesRead =
+		is.read(mybytearray, current, (mybytearray.length-current));
+		if(bytesRead >= 0) current += bytesRead;
+		} while(bytesRead > -1);
+		bos.write(mybytearray, 0 , current);
+		bos.flush();
+		System.out.println("File " + FILE_TO_RECEIVED
+		+ " downloaded (" + current + " bytes read)");
+		}
+		finally {
+		if (fos != null) fos.close();
+		if (bos != null) bos.close();
+		if (sock != null) sock.close();
+		}
+		}
+		}
+
+
+
+//UDP
+//server
+
+import java.io.*;
+import java.net.*;
+public class udpserver {
+	
+	public static void main(String []args) throws IOException
+	{
+		System.out.println("waiting");
+		DatagramSocket ds=new DatagramSocket(2000);
+		byte []b=new byte[1000];
+		DatagramPacket dp=new DatagramPacket(b,b.length);
+		ds.receive(dp);
+		String msg=new String(b);
+		System.out.println("message recieved   "+msg);
+	}
+}
+//client
+
+import java.io.*;
+import java.net.*;
+public class udpclient {
+	
+	public static void main(String []args) throws IOException
+	{
+		DatagramSocket ds=new DatagramSocket();
+		byte [] b="My name is Akshat".getBytes();
+		InetAddress ip=InetAddress.getByName("localhost");
+		int port=2000;
+		DatagramPacket dp=new DatagramPacket(b,b.length,ip,port);
+		ds.send(dp);
+	}
+}
